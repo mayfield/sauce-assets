@@ -1,0 +1,22 @@
+#!/bin/sh -e
+
+if [ ! -d "$1" ] || [ ! -f "${1}/manifest_${2}.json" ] ; then
+    echo Usage: $0 SAUCE_DIR MANIFEST_KIND 1>&2
+    exit 1
+fi
+
+TMPDIR=$(mktemp -d)
+rsync -av \
+    --exclude '.git*' \
+    --exclude 'manifest*.json' \
+    --exclude 'README.md' \
+    --exclude '.eslint*' \
+    --exclude '*.swp*' \
+    $1 $TMPDIR
+cp -a "${1}/manifest_${2}.json" $TMPDIR/manifest.json
+GIT_COMMIT=$(cd $1 ; git rev-parse --short HEAD)
+CWD=$(pwd)
+cd $TMPDIR
+OUTFILE="${CWD}/sauce-${2}-${GIT_COMMIT}.zip"
+zip -r -FS "$OUTFILE" *
+echo Wrote $OUTFILE
