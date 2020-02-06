@@ -13,12 +13,15 @@ rsync -av \
     --exclude '.eslint*' \
     --exclude '*.swp*' \
     $1/* $TMPDIR
-cp -a "${1}/manifest_${2}.json" $TMPDIR/manifest.json
+
+$(dirname $0)/mergejson "$1/manifest_base.json" "$1/manifest_$2.json" > $TMPDIR/manifest.json
+
 if [ "$2" == "gecko" ]; then
     rm "$TMPDIR/src/bg/main_declaritive.js"
 else
     rm "$TMPDIR/src/bg/main_legacy.js"
 fi
+
 GIT_COMMIT=$(cd $1 ; git rev-parse --short HEAD)
 CWD=$(pwd)
 cd $TMPDIR
